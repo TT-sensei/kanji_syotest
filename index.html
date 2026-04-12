@@ -1,1 +1,429 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>漢字進級テスト（前期）</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Kosugi Maru', sans-serif;
+            background-color: #fffaf0;
+            background-image: 
+                radial-gradient(#ffd57a 15%, transparent 16%), 
+                radial-gradient(#ffb961 15%, transparent 16%);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+        }
 
+        .cell-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .item-icon {
+            font-size: 2.5rem;
+            transition: all 0.3s ease;
+            pointer-events: none;
+            user-select: none;
+        }
+        
+        .item-unpassed {
+            opacity: 0.2;
+            filter: grayscale(100%);
+            transform: scale(0.8);
+        }
+
+        .item-passed {
+            opacity: 1;
+            animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+        }
+
+        @keyframes pop-in {
+            0% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
+            50% { transform: scale(1.2) rotate(5deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .test-table th, .test-table td {
+            border: 2px solid #374151;
+        }
+
+        /* モーダル画像エリア：縦幅を全部使う */
+        #modalImageArea {
+            flex: 1 1 0%;
+            min-height: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #111;
+            overflow: hidden;
+            padding: 8px;
+        }
+
+        #modalImage {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 text-gray-800">
+
+    <div class="max-w-5xl mx-auto bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl p-6 md:p-10 border-4 border-orange-100">
+        
+        <div class="mb-8 border-b-4 border-orange-300 pb-4 inline-block">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800 tracking-wider">漢字進級テスト <span class="text-2xl md:text-3xl text-gray-600">（前期）</span></h1>
+        </div>
+
+        <div class="mb-8 text-lg md:text-xl leading-relaxed bg-orange-50 p-4 rounded-xl border border-orange-200">
+            <p>💯 <span class="font-bold text-red-500">100点満点、80点以上で合格！</span> 次に進めます！</p>
+            <p>🚶‍♂️ 進み方は二通り。 ①レベルを上げる！ ②先に進む。 どちらか自分で選んで進めてください。</p>
+        </div>
+
+        <div class="overflow-x-auto mb-8">
+            <table class="test-table w-full bg-white text-center text-lg">
+                <thead>
+                    <tr class="bg-orange-100">
+                        <th class="py-3 px-2 w-24">級</th>
+                        <th class="py-3 px-2 w-1/6">1</th>
+                        <th class="py-3 px-2 w-1/6">2</th>
+                        <th class="py-3 px-2 w-1/6">3</th>
+                        <th class="py-3 px-2 w-1/6">4</th>
+                        <th class="py-3 px-2 w-1/6">5</th>
+                        <th class="py-3 px-2 w-1/6">6</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody1"></tbody>
+            </table>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="test-table w-full bg-white text-center text-lg">
+                <thead>
+                    <tr class="bg-orange-100">
+                        <th class="py-3 px-2 w-24">級</th>
+                        <th class="py-3 px-2 w-1/6">7</th>
+                        <th class="py-3 px-2 w-1/6">8</th>
+                        <th class="py-3 px-2 w-1/6">9</th>
+                        <th class="py-3 px-2 w-1/6">10</th>
+                        <th class="py-3 px-2 w-1/6">11</th>
+                        <th class="py-3 px-2 w-1/6">12</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody2"></tbody>
+            </table>
+        </div>
+
+        <div class="mt-8 text-right">
+            <button onclick="resetProgress()" class="text-sm text-gray-400 hover:text-red-500 underline transition-colors">冒険の記録（クリア履歴）をすべてリセットする</button>
+        </div>
+    </div>
+
+    <!-- ★メインモーダル：画面全体、縦を使い切る -->
+    <div id="testModal" class="fixed inset-0 z-50 hidden flex-col items-center justify-center p-2"
+         style="background:rgba(0,0,0,0.88);">
+        <!-- モーダル本体：画面高さいっぱい -->
+        <div class="bg-white rounded-2xl shadow-2xl w-full flex flex-col overflow-hidden relative transform transition-all scale-95 opacity-0"
+             id="modalContent"
+             style="max-width:98vw; height:96vh;">
+            
+            <!-- ヘッダー：コンパクト -->
+            <div class="bg-orange-400 text-white px-4 py-3 flex justify-between items-center shadow-md flex-shrink-0">
+                <h2 id="modalTitle" class="text-xl font-bold tracking-wide">級・レベル</h2>
+                <button onclick="closeModal()" class="text-white hover:text-orange-200 focus:outline-none transition-colors ml-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 画像エリア：残り縦幅を全部使う -->
+            <div id="modalImageArea">
+                <img id="modalImage" src="" alt="テスト画像"
+                     style="display:none;" onerror="showImageError()">
+                
+                <div id="imagePlaceholder" class="hidden text-center text-gray-400 p-12">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto mb-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p class="text-lg mb-2 font-bold text-gray-300">画像の準備ができていません</p>
+                    <p class="text-sm text-gray-500">以下のパスに画像を配置してください：</p>
+                    <code id="expectedPath" class="block mt-2 bg-gray-800 p-2 rounded text-orange-400 font-mono text-sm"></code>
+                </div>
+            </div>
+
+            <!-- フッター：コンパクト -->
+            <div class="bg-gray-50 px-4 py-3 border-t flex justify-between items-center flex-shrink-0">
+                <span class="text-gray-400 text-sm hidden md:block">※画像を右クリックして保存・印刷できます</span>
+                <button id="passButton"
+                        class="bg-red-500 hover:bg-red-600 active:bg-red-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transform hover:scale-105 transition-all text-xl flex items-center gap-2 ml-auto">
+                    🔥 クリア！
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- パスワードモーダル -->
+    <div id="passwordModal" class="fixed inset-0 bg-black/60 z-[60] hidden flex-col items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center transform transition-all scale-95 opacity-0" id="passwordModalContent">
+            <h3 class="text-xl font-bold mb-4 text-gray-800">先生にパスワードを入力<br>してもらってね！</h3>
+            <p class="text-sm text-gray-500 mb-4">（おためし用パスワードは 777 です）</p>
+            <input type="password" id="passwordInput"
+                   class="w-full border-2 border-gray-300 rounded-lg p-3 mb-4 text-center text-2xl tracking-widest focus:outline-none focus:border-orange-500"
+                   placeholder="***">
+            <p id="passwordError" class="text-red-500 text-sm mb-4 hidden font-bold">パスワードがちがいます！</p>
+            <div class="flex justify-center gap-4">
+                <button onclick="closePasswordModal()" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors font-bold">キャンセル</button>
+                <button onclick="checkPassword()" class="px-6 py-3 bg-orange-500 text-white rounded-full hover:bg-orange-600 transition-colors font-bold">けってい</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 確認モーダル -->
+    <div id="confirmModal" class="fixed inset-0 bg-black/60 z-[60] hidden flex-col items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 text-center transform transition-all scale-95 opacity-0" id="confirmModalContent">
+            <h3 id="confirmTitle" class="text-lg font-bold mb-6 text-gray-800 whitespace-pre-line">かくにん</h3>
+            <div class="flex justify-center gap-4">
+                <button onclick="closeConfirmModal()" class="px-6 py-3 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors font-bold">やめる</button>
+                <button id="confirmActionButton" class="px-6 py-3 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors font-bold">はい</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TEACHER_PASSWORD = "777"; 
+
+        let currentCellId = '';
+        let currentItemEmoji = '';
+        let passedRecords = JSON.parse(localStorage.getItem('kanjiPassedRecords')) || [];
+
+        function generateTable(tableBodyId, startKyu) {
+            const tbody = document.getElementById(tableBodyId);
+            const levels = ['レベル１', 'レベル２', 'レベル３'];
+            const allEmojis = [
+                ['🌱', '🌿', '🍄', '🪨', '🪵', '💧', '🔥', '💨', '⚡', '❄️', '🌟', '🌑'],
+                ['🗡️', '🏹', '🛡️', '🪓', '🔨', '💣', '🔮', '📜', '🧪', '🔑', '🪙', '💎'],
+                ['🦇', '🐺', '🐻', '🦅', '🦂', '🐍', '🦈', '🐊', '🦍', '🦏', '🦖', '🐉']
+            ];
+
+            levels.forEach((levelName, levelIndex) => {
+                const tr = document.createElement('tr');
+                const th = document.createElement('th');
+                th.className = 'py-3 px-2 bg-orange-50';
+                th.textContent = levelName;
+                tr.appendChild(th);
+
+                for (let i = 0; i < 6; i++) {
+                    const kyu = startKyu + i;
+                    const folderName = `kanji_test_${levelIndex + 1}`;
+                    const fileName = `${kyu}.jpg`;
+                    const emoji = allEmojis[levelIndex][kyu - 1]; 
+                    const cellId = `level-${levelIndex + 1}-kyu-${kyu}`;
+                    const isPassed = passedRecords.includes(cellId);
+
+                    const td = document.createElement('td');
+                    td.className = 'p-0 cursor-pointer hover:bg-orange-100 transition-colors duration-200';
+                    td.onclick = () => openModal(cellId, kyu, levelName, folderName, fileName, emoji);
+                    
+                    const iconClass = isPassed ? 'item-passed' : 'item-unpassed';
+                    td.innerHTML = `
+                        <div class="cell-content">
+                            <span id="icon-${cellId}" class="item-icon ${iconClass}">${emoji}</span>
+                        </div>
+                    `;
+                    tr.appendChild(td);
+                }
+                tbody.appendChild(tr);
+            });
+        }
+
+        generateTable('tableBody1', 1);
+        generateTable('tableBody2', 7);
+
+        const modal = document.getElementById('testModal');
+        const modalContent = document.getElementById('modalContent');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalImage = document.getElementById('modalImage');
+        const imagePlaceholder = document.getElementById('imagePlaceholder');
+        const expectedPath = document.getElementById('expectedPath');
+        const passButton = document.getElementById('passButton');
+
+        function openModal(cellId, kyu, levelName, folderName, fileName, emoji) {
+            currentCellId = cellId;
+            currentItemEmoji = emoji;
+            const imagePath = `${folderName}/${fileName}`;
+
+            modalTitle.textContent = `${kyu}級 - ${levelName}`;
+            
+            // 画像リセット
+            modalImage.style.display = 'none';
+            imagePlaceholder.classList.add('hidden');
+            modalImage.src = '';
+
+            if (passedRecords.includes(cellId)) {
+                passButton.innerHTML = '✨ クリア済み（取り消す）';
+                passButton.style.background = '';
+                passButton.classList.remove('bg-red-500','hover:bg-red-600','active:bg-red-700');
+                passButton.classList.add('bg-gray-400','hover:bg-gray-500','active:bg-gray-600');
+            } else {
+                passButton.innerHTML = `🔥 クリア！（${emoji} ゲット）`;
+                passButton.classList.remove('bg-gray-400','hover:bg-gray-500','active:bg-gray-600');
+                passButton.classList.add('bg-red-500','hover:bg-red-600','active:bg-red-700');
+            }
+
+            modalImage.onload = function() {
+                modalImage.style.display = 'block';
+                imagePlaceholder.classList.add('hidden');
+            };
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+                modalImage.src = imagePath;
+            }, 10);
+        }
+
+        function showImageError() {
+            modalImage.style.display = 'none';
+            imagePlaceholder.classList.remove('hidden');
+            expectedPath.textContent = modalImage.getAttribute('src');
+        }
+
+        function closeModal() {
+            modalContent.classList.remove('scale-100', 'opacity-100');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        // パスワードモーダル
+        const passwordModal = document.getElementById('passwordModal');
+        const passwordModalContent = document.getElementById('passwordModalContent');
+        const passwordInput = document.getElementById('passwordInput');
+        const passwordError = document.getElementById('passwordError');
+
+        const confirmModal = document.getElementById('confirmModal');
+        const confirmModalContent = document.getElementById('confirmModalContent');
+        const confirmTitle = document.getElementById('confirmTitle');
+        const confirmActionButton = document.getElementById('confirmActionButton');
+
+        let confirmAction = null;
+
+        function openPasswordModal() {
+            passwordInput.value = '';
+            passwordError.classList.add('hidden');
+            passwordModal.classList.remove('hidden');
+            passwordModal.classList.add('flex');
+            setTimeout(() => {
+                passwordModalContent.classList.remove('scale-95', 'opacity-0');
+                passwordModalContent.classList.add('scale-100', 'opacity-100');
+                passwordInput.focus();
+            }, 10);
+        }
+
+        function closePasswordModal() {
+            passwordModalContent.classList.remove('scale-100', 'opacity-100');
+            passwordModalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                passwordModal.classList.add('hidden');
+                passwordModal.classList.remove('flex');
+            }, 300);
+        }
+
+        passwordInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') checkPassword();
+        });
+
+        function checkPassword() {
+            if (passwordInput.value === TEACHER_PASSWORD) {
+                closePasswordModal();
+                executePass();
+            } else {
+                passwordError.classList.remove('hidden');
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        }
+
+        function openConfirmModal(message, action) {
+            confirmTitle.textContent = message;
+            confirmAction = action;
+            confirmModal.classList.remove('hidden');
+            confirmModal.classList.add('flex');
+            setTimeout(() => {
+                confirmModalContent.classList.remove('scale-95', 'opacity-0');
+                confirmModalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeConfirmModal() {
+            confirmModalContent.classList.remove('scale-100', 'opacity-100');
+            confirmModalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                confirmModal.classList.add('hidden');
+                confirmModal.classList.remove('flex');
+                confirmAction = null;
+            }, 300);
+        }
+
+        confirmActionButton.addEventListener('click', () => {
+            if (confirmAction) confirmAction();
+            closeConfirmModal();
+        });
+
+        function executePass() {
+            const iconElement = document.getElementById(`icon-${currentCellId}`);
+            passedRecords.push(currentCellId);
+            iconElement.classList.remove('item-unpassed');
+            void iconElement.offsetWidth;
+            iconElement.classList.add('item-passed');
+            localStorage.setItem('kanjiPassedRecords', JSON.stringify(passedRecords));
+            closeModal();
+        }
+
+        function executeCancel() {
+            const iconElement = document.getElementById(`icon-${currentCellId}`);
+            passedRecords = passedRecords.filter(id => id !== currentCellId);
+            iconElement.classList.remove('item-passed');
+            iconElement.classList.add('item-unpassed');
+            localStorage.setItem('kanjiPassedRecords', JSON.stringify(passedRecords));
+            closeModal();
+        }
+
+        passButton.addEventListener('click', () => {
+            if (passedRecords.includes(currentCellId)) {
+                openConfirmModal('クリアを取り消しますか？', executeCancel);
+            } else {
+                openPasswordModal();
+            }
+        });
+
+        function resetProgress() {
+            openConfirmModal('今までの「🔥 クリア」の記録をすべて消去します。\n本当によろしいですか？', () => {
+                localStorage.removeItem('kanjiPassedRecords');
+                passedRecords = [];
+                location.reload();
+            });
+        }
+    </script>
+</body>
+</html>
