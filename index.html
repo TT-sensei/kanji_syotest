@@ -244,9 +244,9 @@
         </div>
 
         <div class="mt-4 flex flex-wrap justify-end items-center gap-4">
-            <button onclick="openBulkPassModal()"
+            <button id="bulkPassButton" onclick="handleBulkPassButton()"
                     class="text-sm font-bold text-blue-500 hover:text-blue-700 underline transition-colors">
-                🛡️ 一括合格（先生用）
+                🛡️ 一括合格を選択
             </button>
             <button onclick="resetProgress()" class="text-sm text-gray-400 hover:text-red-500 underline transition-colors">
                 冒険の記録（クリア履歴）をすべてリセットする
@@ -467,6 +467,7 @@
                                ${selectedCellIds.has(cellId) ? 'checked' : ''}
                                ${selectDisabled ? 'disabled' : ''}
                                onclick="event.stopPropagation()"
+                               style="${bulkSelectMode ? '' : 'display:none;'}"
                                onchange="toggleCellSelection('${cellId}', this.checked)">
                         <span id="icon-${cellId}" class="item-icon ${iconCls}">${iconHtml}</span>
                         <span class="item-date">${dateStr}</span>
@@ -627,15 +628,23 @@
 
     let bulkPassMode = false;
 
+    let bulkSelectMode = false;
+
     function toggleCellSelection(cellId, checked) {
         if (checked) selectedCellIds.add(cellId);
         else selectedCellIds.delete(cellId);
         refreshTable();
     }
 
-    function openBulkPassModal() {
+    function handleBulkPassButton() {
+        if (!bulkSelectMode) {
+            bulkSelectMode = true;
+            document.getElementById('bulkPassButton').textContent = '✅ 選択したものを一括合格';
+            refreshTable();
+            return;
+        }
         if (selectedCellIds.size === 0) {
-            alert('先に合格させたいステージを選択してください。');
+            alert('合格させたいステージを選択してください。');
             return;
         }
         bulkPassMode = true;
