@@ -45,6 +45,21 @@
             display: block;
         }
 
+        .cell-select {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 18px;
+            height: 18px;
+            accent-color: #2563eb;
+            z-index: 2;
+        }
+
+        .cell-selected {
+            outline: 4px solid #60a5fa;
+            outline-offset: -4px;
+        }
+
         .item-date {
             font-size: 0.55rem;
             color: #6b7280;
@@ -75,8 +90,8 @@
             50% { transform: translateY(-4px); }
         }
         .item-challenge {
-            opacity: 0.8;
-            filter: grayscale(40%);
+            opacity: 0.7;
+            filter: grayscale(100%);
             animation: float-subtle 2s ease-in-out infinite;
         }
 
@@ -228,7 +243,11 @@
             </button>
         </div>
 
-        <div class="mt-4 text-right">
+        <div class="mt-4 flex flex-wrap justify-end items-center gap-4">
+            <button onclick="openBulkPassModal()"
+                    class="text-sm font-bold text-blue-500 hover:text-blue-700 underline transition-colors">
+                🛡️ 一括合格（先生用）
+            </button>
             <button onclick="resetProgress()" class="text-sm text-gray-400 hover:text-red-500 underline transition-colors">
                 冒険の記録（クリア履歴）をすべてリセットする
             </button>
@@ -311,8 +330,9 @@
     // 定数（Edge表示最適化版）
     // ============================================================
     const TOTAL_CELLS    = 36;
+    const selectedCellIds = new Set();
 
-    // 級ごとのエレメント。各級は同じ属性の Lv.1 → Lv.2 → Lv.3 でそろえる。
+    // 級ごとのエレメント.各級は同じ属性の Lv.1 → Lv.2 → Lv.3 でそろえる。
     const elementByKyu = {
         1: { slug: 'fire',    name: '炎' },
         2: { slug: 'water',   name: '水' },
@@ -438,8 +458,16 @@
                 if (state.lap === 2 && lap1Done && !passed) td.classList.add('lap2-cell');
 
                 td.onclick = () => openModal(cellId, kyu, levelName, `kanji_test_${level}`, `${kyu}.jpg`, badge.name, level);
+                if (selectedCellIds.has(cellId)) td.classList.add('cell-selected');
+                const selectDisabled = !unlocked || passed;
                 td.innerHTML = `
                     <div class="cell-content">
+                        <input class="cell-select" type="checkbox"
+                               aria-label="${kyu}級 レベル${level}を選択"
+                               ${selectedCellIds.has(cellId) ? 'checked' : ''}
+                               ${selectDisabled ? 'disabled' : ''}
+                               onclick="event.stopPropagation()"
+                               onchange="toggleCellSelection('${cellId}', this.checked)">
                         <span id="icon-${cellId}" class="item-icon ${iconCls}">${iconHtml}</span>
                         <span class="item-date">${dateStr}</span>
                     </div>`;
@@ -597,6 +625,23 @@
     const passwordInput        = document.getElementById('passwordInput');
     const passwordError        = document.getElementById('passwordError');
 
+    let bulkPassMode = false;
+
+    function toggleCellSelection(cellId, checked) {
+        if (checked) selectedCellIds.add(cellId);
+        else selectedCellIds.delete(cellId);
+        refreshTable();
+    }
+
+    function openBulkPassModal() {
+        if (selectedCellIds.size === 0) {
+            alert('先に合格させたいステージを選択してください。');
+            return;
+        }
+        bulkPassMode = true;
+        openPasswordModal();
+    }
+
     function openPasswordModal() {
         passwordInput.value = '';
         passwordError.classList.add('hidden');
@@ -610,6 +655,7 @@
     }
 
     function closePasswordModal() {
+        bulkPassMode = false;
         passwordModalContent.classList.remove('scale-100','opacity-100');
         passwordModalContent.classList.add('scale-95','opacity-0');
         setTimeout(() => {
@@ -621,7 +667,16 @@
     passwordInput.addEventListener('keypress', e => { if (e.key === 'Enter') checkPassword(); });
 
     function checkPassword() {
-        if (passwordInput.value === getPassword(currentKyu, currentLevel)) {
+        if (bulkPassMode) {
+            if (passwordInput.value === '8818') {
+                closePasswordModal();
+                executeBulkPass();
+            } else {
+                passwordError.classList.remove('hidden');
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        } else if (passwordInput.value === getPassword(currentKyu, currentLevel)) {
             closePasswordModal();
             executePass();
         } else {
@@ -682,6 +737,16 @@
         saveData();
         refreshTable();
         closeModal();
+    }
+
+    function executeBulkPass() {
+        selectedCellIds.forEach(cellId => {
+            state.passedDates[cellId] = todayStr();
+        });
+        selectedCellIds.clear();
+        saveData();
+        launchConfetti();
+        refreshTable();
     }
 
     passButton.addEventListener('click', () => {
