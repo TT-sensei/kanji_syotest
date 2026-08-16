@@ -459,7 +459,8 @@
 
                 td.onclick = () => openModal(cellId, kyu, levelName, `kanji_test_${level}`, `${kyu}.jpg`, badge.name, level);
                 if (selectedCellIds.has(cellId)) td.classList.add('cell-selected');
-                const selectDisabled = !unlocked || passed;
+                // 一括選択モードでは、鍵付きステージも解放条件を飛ばして選択可能。
+                const selectDisabled = passed;
                 td.innerHTML = `
                     <div class="cell-content">
                         <input class="cell-select" type="checkbox"
