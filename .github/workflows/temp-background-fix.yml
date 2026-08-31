@@ -1,0 +1,30 @@
+name: temporary-background-fix
+on:
+  push:
+    branches: [main]
+jobs:
+  fix-background:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply schoolyard background
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          old = '''        body {\n            font-family: 'Kosugi Maru', sans-serif;\n            background-color: #fffaf0;\n            background-image:\n                radial-gradient(#ffd57a 15%, transparent 16%),\n                radial-gradient(#ffb961 15%, transparent 16%);\n            background-size: 60px 60px;\n            background-position: 0 0, 30px 30px;\n        }'''
+          new = '''        body {\n            font-family: 'Kosugi Maru', sans-serif;\n            background-color: #fffaf0;\n            position: relative;\n            min-height: 100vh;\n        }\n\n        body::before {\n            content: '';\n            position: fixed;\n            inset: 0;\n            background: linear-gradient(rgba(255,255,255,.38), rgba(255,255,255,.38)), url('https://tt-sensei.github.io/navi-character-/assets/web/backgrounds/daily/daily-schoolyard.webp') center center / cover no-repeat;\n            z-index: -1;\n            pointer-events: none;\n        }'''
+          if old not in s:
+              raise SystemExit('target CSS block not found')
+          p.write_text(s.replace(old, new, 1), encoding='utf-8')
+          PY
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "背景を校庭・放課後に変更" || exit 0
+          git push
