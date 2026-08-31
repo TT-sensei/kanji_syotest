@@ -21,13 +21,13 @@
             position: relative;
             width: 100%;
             height: 100%;
-            min-height: 64px;
+            min-height: 82px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 2px;
-            padding: 4px 2px;
+            gap: 1px;
+            padding: 2px 1px;
         }
 
         .item-icon {
@@ -39,8 +39,8 @@
         }
 
         .element-badge {
-            width: 56px;
-            height: 56px;
+            width: 76px;
+            height: 76px;
             object-fit: contain;
             display: block;
         }
@@ -164,18 +164,18 @@
         }
     </style>
 </head>
-<body class="p-4 md:p-8 text-gray-800">
+<body class="p-2 md:p-3 text-gray-800">
 
-    <div class="max-w-5xl mx-auto bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl p-6 md:p-10 border-4 border-orange-100">
+    <div class="max-w-6xl mx-auto bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl p-2 md:p-4 border-4 border-orange-100">
 
         <!-- ヘッダー -->
-        <div class="flex flex-wrap items-end justify-between gap-4 mb-6 border-b-4 border-orange-300 pb-4">
+        <div class="flex flex-wrap items-end justify-between gap-2 mb-2 border-b-4 border-orange-300 pb-2">
             <div>
                 <h1 class="text-3xl md:text-4xl font-bold text-gray-800 tracking-wider">
                     漢字進級テスト
                     <span id="semesterTitle" class="text-2xl md:text-3xl text-gray-600">（前期）</span>
                 </h1>
-                <div class="mt-3 inline-flex rounded-full bg-gray-100 p-1 shadow-inner" id="semesterSwitch">
+                <div class="mt-1 inline-flex rounded-full bg-gray-100 p-1 shadow-inner" id="semesterSwitch">
     <button id="frontSemesterBtn" onclick="switchSemester('front')" class="px-5 py-2 rounded-full font-bold text-sm md:text-base transition-all">前期</button>
     <button id="backSemesterBtn" onclick="switchSemester('back')" class="px-5 py-2 rounded-full font-bold text-sm md:text-base transition-all">後期</button>
 </div>
@@ -195,23 +195,23 @@
             </div>
         </div>
 
-        <div class="mb-8 text-lg md:text-xl leading-relaxed bg-orange-50 p-4 rounded-xl border border-orange-200">
+        <div class="mb-3 text-base md:text-lg leading-snug bg-orange-50 p-2 rounded-xl border border-orange-200">
             <p>💯 <span class="font-bold text-red-500">100点満点、80点以上で合格！</span> 次に進めます！</p>
             <p>🚶‍♂️ 進み方は二通り。 ①レベルを上げる！ ②先に進む。 どちらか自分で選んで進めてください。</p>
         </div>
 
         <!-- 表1: 1〜6級 -->
-        <div class="overflow-x-auto mb-8">
+        <div class="overflow-x-auto mb-3">
             <table class="test-table w-full bg-white text-center text-lg">
                 <thead>
                     <tr class="bg-orange-100">
-                        <th class="py-3 px-2 w-24">級</th>
-                        <th class="py-3 px-2 w-1/6">1</th>
-                        <th class="py-3 px-2 w-1/6">2</th>
-                        <th class="py-3 px-2 w-1/6">3</th>
-                        <th class="py-3 px-2 w-1/6">4</th>
-                        <th class="py-3 px-2 w-1/6">5</th>
-                        <th class="py-3 px-2 w-1/6">6</th>
+                        <th class="py-1 px-1 w-20">級</th>
+                        <th class="py-1 px-1 w-1/6">1</th>
+                        <th class="py-1 px-1 w-1/6">2</th>
+                        <th class="py-1 px-1 w-1/6">3</th>
+                        <th class="py-1 px-1 w-1/6">4</th>
+                        <th class="py-1 px-1 w-1/6">5</th>
+                        <th class="py-1 px-1 w-1/6">6</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody1"></tbody>
@@ -219,17 +219,17 @@
         </div>
 
         <!-- 表2: 7〜12級 -->
-        <div class="overflow-x-auto mb-8">
+        <div class="overflow-x-auto mb-3">
             <table class="test-table w-full bg-white text-center text-lg">
                 <thead>
                     <tr class="bg-orange-100">
-                        <th class="py-3 px-2 w-24">級</th>
-                        <th class="py-3 px-2 w-1/6">7</th>
-                        <th class="py-3 px-2 w-1/6">8</th>
-                        <th class="py-3 px-2 w-1/6">9</th>
-                        <th class="py-3 px-2 w-1/6">10</th>
-                        <th class="py-3 px-2 w-1/6">11</th>
-                        <th class="py-3 px-2 w-1/6">12</th>
+                        <th class="py-1 px-1 w-20">級</th>
+                        <th class="py-1 px-1 w-1/6">7</th>
+                        <th class="py-1 px-1 w-1/6">8</th>
+                        <th class="py-1 px-1 w-1/6">9</th>
+                        <th class="py-1 px-1 w-1/6">10</th>
+                        <th class="py-1 px-1 w-1/6">11</th>
+                        <th class="py-1 px-1 w-1/6">12</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody2"></tbody>
@@ -237,21 +237,21 @@
         </div>
 
         <div id="backSection" class="hidden">
-            <div class="overflow-x-auto mb-8">
+            <div class="overflow-x-auto mb-3">
                 <table class="test-table w-full bg-white text-center text-lg">
                     <thead><tr class="bg-blue-100">
-                        <th class="py-3 px-2 w-24">級</th>
-                        <th class="py-3 px-2 w-1/6">13</th><th class="py-3 px-2 w-1/6">14</th><th class="py-3 px-2 w-1/6">15</th>
-                        <th class="py-3 px-2 w-1/6">16</th><th class="py-3 px-2 w-1/6">17</th><th class="py-3 px-2 w-1/6">18</th>
+                        <th class="py-1 px-1 w-20">級</th>
+                        <th class="py-1 px-1 w-1/6">13</th><th class="py-1 px-1 w-1/6">14</th><th class="py-1 px-1 w-1/6">15</th>
+                        <th class="py-1 px-1 w-1/6">16</th><th class="py-1 px-1 w-1/6">17</th><th class="py-1 px-1 w-1/6">18</th>
                     </tr></thead><tbody id="backTableBody1"></tbody>
                 </table>
             </div>
-            <div class="overflow-x-auto mb-8">
+            <div class="overflow-x-auto mb-3">
                 <table class="test-table w-full bg-white text-center text-lg">
                     <thead><tr class="bg-blue-100">
-                        <th class="py-3 px-2 w-24">級</th>
-                        <th class="py-3 px-1 w-1/6">19</th><th class="py-3 px-1 w-1/6">20</th><th class="py-3 px-1 w-1/6">21</th>
-                        <th class="py-3 px-1 w-1/6">22</th><th class="py-3 px-1 w-1/6">23</th><th class="py-3 px-1 w-1/6">24</th>
+                        <th class="py-1 px-1 w-20">級</th>
+                        <th class="py-1 px-1 w-1/6">19</th><th class="py-1 px-1 w-1/6">20</th><th class="py-1 px-1 w-1/6">21</th>
+                        <th class="py-1 px-1 w-1/6">22</th><th class="py-1 px-1 w-1/6">23</th><th class="py-1 px-1 w-1/6">24</th>
                     </tr></thead><tbody id="backTableBody2"></tbody>
                 </table>
             </div>
